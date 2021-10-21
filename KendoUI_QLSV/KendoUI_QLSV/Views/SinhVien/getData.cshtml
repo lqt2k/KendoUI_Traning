@@ -1,0 +1,69 @@
+﻿@using Kendo.Mvc.UI
+@using KendoUI_QLSV.Models.subModels
+@{
+    ViewBag.Title = "getData";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/jquery-3.3.1.min.js"></script>
+<script src="~/Scripts/kendo/2021.3.914/kendo.all.min.js"></script>
+
+<h2>DANH SÁCH SINH VIÊN</h2>
+
+@(Html.Kendo().Grid<KendoUI_QLSV.Models.SinhVien>()
+    .Name("Grid")
+    .Columns(columns => {
+        columns.Bound(p => p.MaSinhVien).Width(150);
+        columns.Bound(p => p.HoTen);
+        columns.Bound(p => p.NgaySinh).Width(150);
+        columns.Bound(p => p.MaLop).Width(150);
+        columns.Command(command => command.Destroy()).Width(150);
+    })
+    .ToolBar(toolbar => {
+        toolbar.Create();
+        toolbar.Save();
+    })
+    .Height(550)
+    .Editable(editable => editable.Mode(GridEditMode.InCell))
+    .Pageable()
+    .Navigatable()
+    .Sortable()
+    .Scrollable()
+    .Events(events => events.Sort("onSort"))
+    .DataSource(dataSource => dataSource
+        .Ajax()
+        .Batch(true)
+        .PageSize(20)
+        .ServerOperation(false)
+        .Events(events => events.Error("error_handler"))
+        .Model(model => model.Id(p => p.MaSinhVien))
+        .Create("Create_SinhVien", "SinhVien")
+        .Read("getData", "SinhVien")
+        .Update("Update_SinhVien", "SinhVien")
+        .Destroy("Delete_SinhVien", "SinhVien")
+    )
+)
+<script>
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+    // Prevent sorting when new record without Product Name is added
+    function onSort(e) {
+        var gridData = e.sender.dataSource.data()
+        gridData.forEach(function (element) {
+            if (!element.ProductName) {
+                e.preventDefault()
+            }
+        });
+    }
+</script>
